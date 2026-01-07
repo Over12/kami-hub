@@ -3,6 +3,41 @@ import Trailer from '@/components/common/Anime/Trailer'
 import Pill from '@/components/common/Pill'
 import { fetchAnimeById } from '@/lib/api'
 
+export async function generateMetadata({ params }: { params: Promise<{ mal_id: number }> }) {
+  const { mal_id } = await params
+  const { data } = await fetchAnimeById({ mal_id })
+
+  return {
+    title: `${data.title} | Kami Hub`,
+    description: data.synopsis?.slice(0, 160),
+    openGraph: {
+      title: `${data.title} | Kami Hub`,
+      description: data.synopsis ?? `Information about the anime ${data.title} on Kami Hub.`,
+      images: data.images.webp.image_url ? [
+        {
+          url: data.images.webp.image_url,
+          width: 800,
+          height: 600,
+          alt: data.title,
+        }
+      ] : undefined,
+    },
+    twitter: {
+      title: `${data.title} | Kami Hub`,
+      description: data.synopsis ?? `Information about the anime ${data.title} on Kami Hub.`,
+      images: data.images.webp.image_url ? [data.images.webp.image_url] : undefined,
+    },
+    alternates: {
+      canonical: `https://kamihub.vercel.app/anime/${mal_id}`,
+    },
+    keywords: [
+      data.title,
+      data.title_english,
+      data.season,
+    ].filter(Boolean)
+  }
+}
+
 export default async function page({ params }: { params: Promise<{ mal_id: number }> }) {
   const { mal_id } = await params
   const { data } = await fetchAnimeById({ mal_id })
